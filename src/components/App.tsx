@@ -13,7 +13,7 @@ const App = () => {
   const [loginDialog, setLoginDialog] = useState(false);
   const [signupDialog, setSignupDialog] = useState(false);
   const [snackbar, setSnackbar] = useState(false);
-
+  const [error, setError] = useState('');
 
   const handleSnackbarClose = (event?: React.SyntheticEvent, reason?: string) => {
     setSnackbar(false); 
@@ -39,8 +39,14 @@ const App = () => {
 
   const signIn = (email: string, password: string) => {
     console.log('Signing in with ' + email + ':' + password);
-    setSnackbar(true);
+
     auth.signInWithEmailAndPassword(email, password)
+    .then()
+    .catch(error => {
+      console.log(error); 
+      setError(error.message);
+      setSnackbar(true);
+    });
   };
 
   /** Sign out of the app */
@@ -59,8 +65,8 @@ const App = () => {
           handleSignup={() => setSignupDialog(true)}
         />
 
-        <Typography variant="h2">
-          {isLoggedIn ? 'Welcome' : 'Not Signed in'}
+        <Typography variant='h4' align='center'>
+          {isLoggedIn ? 'Welcome. Your email is ' + auth.currentUser?.email : 'Not Signed in'}
         </Typography>
 
         <LoginDialog
@@ -70,7 +76,9 @@ const App = () => {
         />
 
         <Snackbar open={snackbar} autoHideDuration={2000} onClose={handleSnackbarClose}>
-          <Alert>Logging you in!</Alert>
+          <Alert severity={error ? "error" : "success"} >
+            {error || "Logged in successfully!"}
+          </Alert>
         </Snackbar>
       </CssBaseline>
     </>
