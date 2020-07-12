@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, CssBaseline, Snackbar } from '@material-ui/core';
 import Bar from './Bar';
-import LoginDialog from './Dialogs/Login';
 import Alert from '@material-ui/lab/Alert'
-
+import { LoginDialog, SignUpDialog } from './Dialogs';
 import { auth } from '../firebase'
 
 
@@ -16,7 +15,7 @@ const App = () => {
   const [error, setError] = useState('');
 
   const handleSnackbarClose = (event?: React.SyntheticEvent, reason?: string) => {
-    setSnackbar(false); 
+    setSnackbar(false);
   }
 
   // Update the authentication state when it changes
@@ -30,26 +29,40 @@ const App = () => {
         console.log('Effect: signed in')
         setLoggedIn(true);
         setLoginDialog(false);
+        setSignupDialog(false);
       }
     })
 
     return () => unsubscribe();
   });
 
+  const signUp = (name: string, email: string, password: string) => {
+    auth.createUserWithEmailAndPassword(email, password)
+      .then(response => {
+        response.user?.updateProfile({
+          displayName: name, 
+        })
+      })
+      .catch(error => {
+        setError(error.message);
+        setSnackbar(true);
+      });
+  }
 
+  // Sign in using email and password
   const signIn = (email: string, password: string) => {
     console.log('Signing in with ' + email + ':' + password);
 
     auth.signInWithEmailAndPassword(email, password)
-    .then()
-    .catch(error => {
-      console.log(error); 
-      setError(error.message);
-      setSnackbar(true);
-    });
+      .then()
+      .catch(error => {
+        console.log(error);
+        setError(error.message);
+        setSnackbar(true);
+      });
   };
 
-  /** Sign out of the app */
+  // Sign out
   const signOut = () => {
     console.log('Signing out');
     auth.signOut();
@@ -66,15 +79,19 @@ const App = () => {
         />
 
         <Typography variant='h4' align='center'>
-          {isLoggedIn ? 'Welcome. Your email is ' + auth.currentUser?.email : 'Not Signed in'}
+          {isLoggedIn ? 'Welcome, ' + auth.currentUser?.displayName : 'Not Signed in'}
         </Typography>
 
         <LoginDialog
           open={loginDialog}
           handleClose={() => setLoginDialog(false)}
-          handleLogin={(email, password) => signIn(email, password)}
+          handleSubmit={(email, password) => signIn(email, password)}
         />
-
+        <SignUpDialog
+          open={signupDialog}
+          handleClose={() => setLoginDialog(false)}
+          handleSubmit={(name, email, password) => signUp(name, email, password)}
+        />
         <Snackbar open={snackbar} autoHideDuration={2000} onClose={handleSnackbarClose}>
           <Alert severity={error ? "error" : "success"} >
             {error || "Logged in successfully!"}
