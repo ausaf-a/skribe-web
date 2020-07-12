@@ -89,7 +89,7 @@ const App = () => {
         />
         <SignUpDialog
           open={signupDialog}
-          handleClose={() => setLoginDialog(false)}
+          handleClose={() => setSignupDialog(false)}
           handleSubmit={(name, email, password) => signUp(name, email, password)}
         />
         <Snackbar open={snackbar} autoHideDuration={2000} onClose={handleSnackbarClose}>
